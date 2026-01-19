@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -20,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.PointToAprilTag;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -27,6 +31,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
+
+import org.photonvision.PhotonCamera;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -40,11 +46,13 @@ public class RobotContainer {
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+  PhotonCamera m_PhotonCamera = new PhotonCamera("SoftwareBot_Camera_Top_Front");
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    // var aprilTags = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     // Configure the button bindings
     configureButtonBindings();
 
@@ -72,6 +80,7 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
+
   private void configureButtonBindings() {
     new JoystickButton(m_driverController, Button.kR1.value)
         .whileTrue(new RunCommand(
@@ -82,6 +91,13 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
+
+    new JoystickButton(m_driverController, XboxController.Button.kB.value)
+        .whileTrue(new PointToAprilTag(
+            m_robotDrive, 1, 
+            () -> m_driverController.getLeftY(),
+            () -> m_driverController.getLeftX(),
+            m_PhotonCamera));
   }
 
   /**
