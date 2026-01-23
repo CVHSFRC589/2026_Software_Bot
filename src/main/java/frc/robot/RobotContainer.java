@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.hal.DriverStationJNI;
 // import edu.wpi.first.apriltag.AprilTag;
 // import edu.wpi.first.apriltag.AprilTagFieldLayout;
 // import edu.wpi.first.apriltag.AprilTagFields;
@@ -16,12 +18,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.DriverStation;
 // import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.PointToAprilTag;
 import frc.robot.subsystems.DriveSubsystem;
@@ -30,6 +35,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import com.pathplanner.lib.auto.*;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
@@ -43,10 +52,12 @@ import org.photonvision.PhotonCamera;
 public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+//   public boolean isTest = false;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   PhotonCamera m_PhotonCamera = new PhotonCamera("SoftwareBot_Camera_Top_Front");
+  AprilTagFieldLayout m_fieldLayout;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -54,6 +65,8 @@ public class RobotContainer {
   public RobotContainer() {
     // var aprilTags = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     // Configure the button bindings
+    m_fieldLayout = FieldConstants.LoadLayout(true);
+    System.out.println("April tag layout field width: " + m_fieldLayout.getFieldWidth());
     configureButtonBindings();
 
     // Configure default commands
