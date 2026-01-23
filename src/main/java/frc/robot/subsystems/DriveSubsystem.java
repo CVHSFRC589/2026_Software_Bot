@@ -57,13 +57,8 @@ public class DriveSubsystem extends SubsystemBase {
       m_gyro.getRotation2d(),
       getSwerveModulePositions());
 
-  SwerveDrivePoseEstimator m_PoseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics,
-      m_gyro.getRotation2d(), new SwerveModulePosition[] {
-          m_frontLeft.getPosition(),
-          m_frontRight.getPosition(),
-          m_rearLeft.getPosition(),
-          m_rearRight.getPosition()
-      }, getPose());
+  SwerveDrivePoseEstimator m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics,
+      m_gyro.getRotation2d(), getSwerveModulePositions(), new Pose2d());
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -77,12 +72,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_odometry.update(
         // Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         m_gyro.getRotation2d(),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        });
+        getSwerveModulePositions());
 
     SmartDashboard.putNumber("Heading", getHeading());
     SmartDashboard.putNumber("FrontLeft Swerve Angle", m_frontLeft.getPosition().angle.getDegrees());
@@ -109,12 +99,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_odometry.resetPosition(
         // Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         m_gyro.getRotation2d(),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        },
+        getSwerveModulePositions(),
         pose);
   }
 
