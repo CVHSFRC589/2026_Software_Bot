@@ -18,7 +18,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
 // import edu.wpi.first.wpilibj.ADIS16470_IMU;
 // import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import frc.robot.Constants.DriveConstants;
@@ -57,8 +56,10 @@ public class DriveSubsystem extends SubsystemBase {
       m_gyro.getRotation2d(),
       getSwerveModulePositions());
 
-  SwerveDrivePoseEstimator m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics,
+  final SwerveDrivePoseEstimator m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics,
       m_gyro.getRotation2d(), getSwerveModulePositions(), new Pose2d());
+
+  // PhotonCamera m_camera;
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -69,16 +70,31 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
+//     if (m_camera.getAllUnreadResults().get(0).getMultiTagResult().isPresent()) {
+//       PhotonPipelineResult result = m_camera.getAllUnreadResults().get(0);
+//       m_camera.
+//       m_poseEstimator.addVisionMeasurement(result.getMultiTagResult().get().estimatedPose., Timer.getFPGATimestamp());
+//     } else {
+// m_poseEstimator.addVisionMeasurement(m_camera.estimateFieldToRobot());
+
+//     }
     m_odometry.update(
         // Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         m_gyro.getRotation2d(),
         getSwerveModulePositions());
+    m_poseEstimator.update(m_gyro.getRotation2d(), getSwerveModulePositions());
 
     SmartDashboard.putNumber("Heading", getHeading());
     SmartDashboard.putNumber("FrontLeft Swerve Angle", m_frontLeft.getPosition().angle.getDegrees());
     SmartDashboard.putNumber("FrontRight Swerve Angle", m_frontRight.getPosition().angle.getDegrees());
     SmartDashboard.putNumber("RearLeft Swerve Angle", m_rearLeft.getPosition().angle.getDegrees());
     SmartDashboard.putNumber("RearRight Swerve Angle", m_rearRight.getPosition().angle.getDegrees());
+    SmartDashboard.putNumber("Pose Estimator Pose X", getPose().getX());
+    SmartDashboard.putNumber("Pose Estimator Pose Y", getPose().getY());
+    SmartDashboard.putNumber("Pose Estimator Pose R", getPose().getRotation().getDegrees());
+    SmartDashboard.putNumber("odo Pose X", m_odometry.getPoseMeters().getX());
+    SmartDashboard.putNumber("odo Pose Y", m_odometry.getPoseMeters().getY());
+    SmartDashboard.putNumber("odo Pose R", m_odometry.getPoseMeters().getRotation().getDegrees());
   }
 
   /**
@@ -87,7 +103,8 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The pose.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
+    // return m_odometry.getPoseMeters();
+    return m_poseEstimator.getEstimatedPosition();
   }
 
   /**
@@ -101,6 +118,8 @@ public class DriveSubsystem extends SubsystemBase {
         m_gyro.getRotation2d(),
         getSwerveModulePositions(),
         pose);
+    m_poseEstimator.resetPose(pose);
+    // m_poseEstimator
   }
 
   /**
