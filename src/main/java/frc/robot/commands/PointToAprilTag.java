@@ -12,6 +12,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -33,7 +34,7 @@ public class PointToAprilTag extends Command {
     m_ySpeed = ySpeed;
     m_xSpeed = xSpeed;
     m_camera = camera;
-    m_turningController = new PIDController(0.00625, 0, 0);
+    m_turningController = new PIDController(AutoConstants.kPThetaController, 0, 0);
     addRequirements(m_driveSubsystem);
   }
 
