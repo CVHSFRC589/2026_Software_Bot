@@ -34,7 +34,7 @@ public class PointToAprilTag extends Command {
     m_ySpeed = ySpeed;
     m_xSpeed = xSpeed;
     m_camera = camera;
-    m_turningController = new PIDController(AutoConstants.kPThetaController, 0, 0);
+    m_turningController = new PIDController(0.00625, 0, 0);
     addRequirements(m_driveSubsystem);
   }
 
@@ -80,7 +80,7 @@ public class PointToAprilTag extends Command {
       // Override the driver's turn command with an automatic one that turns toward
       // the tag.
       
-      turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(targetYaw), 0.01) * DriveConstants.kMaxAngularSpeed;
+      turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(targetYaw + 180), 0.01) * DriveConstants.kMaxAngularSpeed;
       SmartDashboard.putNumber("PIDCalculate", m_turningController.calculate(targetYaw));
       SmartDashboard.putNumber("getYaw", m_turningController.getSetpoint());
       SmartDashboard.putNumber("xSpeed", strafe);
