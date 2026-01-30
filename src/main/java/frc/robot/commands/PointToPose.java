@@ -4,14 +4,18 @@
 
 package frc.robot.commands;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Unit;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
@@ -23,7 +27,8 @@ public class PointToPose extends Command {
   DriveSubsystem m_driveSubsystem;
   DoubleSupplier m_ySpeed;
   DoubleSupplier m_xSpeed;
-  Pose2d m_targetPose = new Pose2d(10.728700637202202, 6.861022058101391, new Rotation2d(6.861022058101391));
+  Pose2d m_targetPose = new Pose2d(11.915394, 4.034536, new Rotation2d(0));
+  double m_theta;
 
   /** Creates a new PointToPose. */
   public PointToPose(DriveSubsystem driveSubsystem, DoubleSupplier ySpeed, DoubleSupplier xSpeed) {
@@ -32,13 +37,23 @@ public class PointToPose extends Command {
     m_xSpeed = xSpeed;
     m_ySpeed = ySpeed;
     m_turningController = new PIDController(0.00625, 0, 0);
-    
+
     addRequirements(m_driveSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+     // getting robot pose for temp storage
+    Pose2d pose = m_driveSubsystem.getPose();
+
+    // getting x distance from target
+    double x = m_targetPose.getMeasureX().magnitude() - pose.getMeasureX().magnitude();
+    // SmartDashboard.putNumber("X distance", x);
+    // getting y distance from target
+    double y = m_targetPose.getMeasureY().magnitude() - pose.getMeasureY().magnitude();
+
+    m_theta = Units.radiansToDegrees(Math.atan2(y, x));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -47,31 +62,60 @@ public class PointToPose extends Command {
     double forward = m_ySpeed.getAsDouble() * DriveConstants.kMaxSpeedMetersPerSecond;
     double strafe = m_xSpeed.getAsDouble() * DriveConstants.kMaxSpeedMetersPerSecond;
     double turn = 0;
-    m_turningController.setSetpoint(0.0);
+    // m_turningController.setSetpoint(0.0);
     // double pose_x = SmartDashboard.getNumber("Target Pose X", 0);
     // double pose_y = SmartDashboard.getNumber("Target Pose Y", 0);
     // double pose_a = SmartDashboard.getNumber("Target Pose A", 0);
     // m_targetPose = new Pose2d(pose_x, pose_y, new Rotation2d(pose_a));
-    
 
     // getting robot pose for temp storage
     Pose2d pose = m_driveSubsystem.getPose();
 
     // getting x distance from target
     double x = m_targetPose.getMeasureX().magnitude() - pose.getMeasureX().magnitude();
-    SmartDashboard.putNumber("X distance", x);
+    // SmartDashboard.putNumber("X distance", x);
     // getting y distance from target
     double y = m_targetPose.getMeasureY().magnitude() - pose.getMeasureY().magnitude();
-SmartDashboard.putNumber("Y distance", y);
+
+    double theta = Units.radiansToDegrees(Math.atan2(y, x));
+    double phi = pose.getRotation().getDegrees();
+
+    // Optional<Alliance> alliance = DriverStation.getAlliance();
+    // if (alliance.get() == Alliance.Red) {
+    // if (x < 0) {
+    // targetYaw = (180 - theta) - phi;
+    // } else {
+    // targetYaw = theta - phi;
+
+    // }
+    // } else if (alliance.get() == Alliance.Blue) {
+    // if (x > 0) {
+    // targetYaw = (180 - theta) - phi;
+    // } else {
+    // targetYaw = theta - phi;
+    // }
+    // } else {
+
+    // }
+
+    // targetYaw -= 72;
+    
+    SmartDashboard.putNumber("Pose Point Target Yaw", theta);
+    // if (x > 0) {
+    // targetYaw = (180 - theta) - phi;
+    // } else {
+    // targetYaw = theta - phi;
+    // }
+    // SmartDashboard.putNumber("Y distance", y);
     // getting angle required to point at target
     // double targetYaw = Units.radiansToDegrees(Math.atan(x/y));
-    double targetYaw = Units.radiansToDegrees(Math.atan2(x,y)) + 180 - pose.getRotation().getDegrees();
-    
-SmartDashboard.putNumber("Target Yaw distance", targetYaw);
+    // double targetYaw = Units.radiansToDegrees(Math.atan2(x,y)) + 180 -
+    // pose.getRotation().getDegrees();
     // Auto-align when requested
-    turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(targetYaw), 0.01)
+    m_turningController.setSetpoint(theta);
+    turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(phi), 0.01)
         * DriveConstants.kMaxAngularSpeed;
-SmartDashboard.putNumber("Turn velocity", turn);
+    SmartDashboard.putNumber("Turn velocity", turn);
     // Command drivetrain motors based on target speeds
     m_driveSubsystem.drive(forward, strafe, turn, true);
   }
