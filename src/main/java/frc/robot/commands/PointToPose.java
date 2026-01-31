@@ -27,7 +27,8 @@ public class PointToPose extends Command {
   DriveSubsystem m_driveSubsystem;
   DoubleSupplier m_ySpeed;
   DoubleSupplier m_xSpeed;
-  Pose2d m_targetPose = new Pose2d(11.915394, 4.034536, new Rotation2d(0));
+  // Pose2d m_targetPose = new Pose2d(11.915394, .034536, new Rotation2d(0));
+  Pose2d m_targetPose = new Pose2d(12.23, 4.03, new Rotation2d(0));
   double m_theta;
 
   /** Creates a new PointToPose. */
@@ -36,7 +37,7 @@ public class PointToPose extends Command {
     m_driveSubsystem = driveSubsystem;
     m_xSpeed = xSpeed;
     m_ySpeed = ySpeed;
-    m_turningController = new PIDController(0.00625, 0, 0);
+    m_turningController = new PIDController(0.0625, 1e-4, 0);
 
     addRequirements(m_driveSubsystem);
   }
@@ -47,13 +48,13 @@ public class PointToPose extends Command {
      // getting robot pose for temp storage
     Pose2d pose = m_driveSubsystem.getPose();
 
-    // getting x distance from target
-    double x = m_targetPose.getMeasureX().magnitude() - pose.getMeasureX().magnitude();
-    // SmartDashboard.putNumber("X distance", x);
-    // getting y distance from target
-    double y = m_targetPose.getMeasureY().magnitude() - pose.getMeasureY().magnitude();
+    // // getting x distance from target
+    // double x = m_targetPose.getX() - pose.getX();
+    // // SmartDashboard.putNumber("X distance", x);
+    // // getting y distance from target
+    // double y = m_targetPose.getY() - pose.getY();
 
-    m_theta = Units.radiansToDegrees(Math.atan2(y, x));
+    // m_theta = Units.radiansToDegrees(Math.atan2(y, x));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -72,13 +73,15 @@ public class PointToPose extends Command {
     Pose2d pose = m_driveSubsystem.getPose();
 
     // getting x distance from target
-    double x = m_targetPose.getMeasureX().magnitude() - pose.getMeasureX().magnitude();
-    // SmartDashboard.putNumber("X distance", x);
+    double x = m_targetPose.getX() - pose.getX();
+    SmartDashboard.putNumber("X distance", x);
     // getting y distance from target
-    double y = m_targetPose.getMeasureY().magnitude() - pose.getMeasureY().magnitude();
+    double y = m_targetPose.getY() - pose.getY();
+    SmartDashboard.putNumber("Y distance", y);
 
-    double theta = Units.radiansToDegrees(Math.atan2(y, x));
+    double theta = Units.radiansToDegrees(Math.atan2(y,x));
     double phi = pose.getRotation().getDegrees();
+    double error = theta-phi;
 
     // Optional<Alliance> alliance = DriverStation.getAlliance();
     // if (alliance.get() == Alliance.Red) {
@@ -101,6 +104,8 @@ public class PointToPose extends Command {
     // targetYaw -= 72;
     
     SmartDashboard.putNumber("Pose Point Target Yaw", theta);
+    SmartDashboard.putNumber("phi", phi);
+    SmartDashboard.putNumber("error", error);
     // if (x > 0) {
     // targetYaw = (180 - theta) - phi;
     // } else {
@@ -113,7 +118,8 @@ public class PointToPose extends Command {
     // pose.getRotation().getDegrees();
     // Auto-align when requested
     m_turningController.setSetpoint(theta);
-    turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(phi), 0.01)
+    // m_turningController.setSetpoint(0);
+    turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(error), 0.01)
         * DriveConstants.kMaxAngularSpeed;
     SmartDashboard.putNumber("Turn velocity", turn);
     // Command drivetrain motors based on target speeds

@@ -115,10 +115,13 @@ public class RobotContainer {
         new JoystickButton(m_driverController, XboxController.Button.kB.value)
                 .whileTrue(new PointToPose(
                         m_robotDrive,
-                        () -> Math.pow(
-                                MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband), 3),
-                        () -> Math.pow(
-                                MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband), 3)));
+                        // () -> Math.pow(
+                        //         MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband), 3),
+                        // () -> Math.pow(
+                        //         MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband), 3)
+                        () -> 0,
+                        () -> 0
+                                ));
     }
 
     /**
