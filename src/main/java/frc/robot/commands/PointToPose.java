@@ -27,8 +27,8 @@ public class PointToPose extends Command {
   DriveSubsystem m_driveSubsystem;
   DoubleSupplier m_ySpeed;
   DoubleSupplier m_xSpeed;
-  // Pose2d m_targetPose = new Pose2d(11.915394, .034536, new Rotation2d(0));
-  Pose2d m_targetPose = new Pose2d(12.23, 4.03, new Rotation2d(0));
+  Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32), new Rotation2d(0));
+  // Pose2d m_targetPose = new Pose2d(12.23, 4.03, new Rotation2d(0));
   double m_theta;
 
   /** Creates a new PointToPose. */
@@ -117,9 +117,9 @@ public class PointToPose extends Command {
     // double targetYaw = Units.radiansToDegrees(Math.atan2(x,y)) + 180 -
     // pose.getRotation().getDegrees();
     // Auto-align when requested
-    m_turningController.setSetpoint(theta);
-    // m_turningController.setSetpoint(0);
-    turn = 1.0 * MathUtil.applyDeadband(m_turningController.calculate(error), 0.01)
+    // m_turningController.setSetpoint(theta);
+    m_turningController.setSetpoint(0);
+    turn = -1.0 * MathUtil.applyDeadband(m_turningController.calculate(error), 0.00)
         * DriveConstants.kMaxAngularSpeed;
     SmartDashboard.putNumber("Turn velocity", turn);
     // Command drivetrain motors based on target speeds

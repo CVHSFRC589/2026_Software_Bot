@@ -49,7 +49,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-    private final PhotonVisionSubsystem m_PhotonVision = new PhotonVisionSubsystem(true,
+    private final PhotonVisionSubsystem m_PhotonVision = new PhotonVisionSubsystem(false,
             m_robotDrive::addVisionMeasurement);
     // public boolean isTest = false;
 
@@ -66,7 +66,7 @@ public class RobotContainer {
     public RobotContainer() {
         // var aprilTags = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
         // Configure the button bindings
-        m_fieldLayout = FieldConstants.LoadLayout(true);
+        m_fieldLayout = FieldConstants.LoadLayout(false);
         System.out.println("April tag layout field width: " + m_fieldLayout.getFieldWidth());
         configureButtonBindings();
         autoChooser = AutoBuilder.buildAutoChooser();
@@ -115,12 +115,12 @@ public class RobotContainer {
         new JoystickButton(m_driverController, XboxController.Button.kB.value)
                 .whileTrue(new PointToPose(
                         m_robotDrive,
-                        // () -> Math.pow(
-                        //         MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband), 3),
-                        // () -> Math.pow(
-                        //         MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband), 3)
-                        () -> 0,
-                        () -> 0
+                        () -> Math.pow(
+                                MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband), 3),
+                        () -> Math.pow(
+                                MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband), 3)
+                        // () -> 0,
+                        // () -> 0
                                 ));
     }
 
