@@ -42,10 +42,36 @@ public class PointToPose extends Command {
     addRequirements(m_driveSubsystem);
   }
 
+  public double getAlignmentAngle(Pose2d pose1, Pose2d pose2) {
+    // getting x distance from target
+    double x = pose1.getX() - pose2.getX();
+    SmartDashboard.putNumber("X distance", x);
+    // getting y distance from target
+    double y = pose1.getY() - pose2.getY();
+    SmartDashboard.putNumber("Y distance", y);
+
+    double thetaOld = Units.radiansToDegrees(Math.atan2(y, x));
+    SmartDashboard.putNumber("thetaOld", thetaOld);
+    double theta = Units.radiansToDegrees(Math.atan2(Math.abs(y), Math.abs(x)));
+    if (y > 0 && x < 0) {
+      // quadrant 3
+      theta = -1 * theta + 180;
+    }
+    if (y < 0 && x < 0) {
+      // quadrant 1
+      theta -= 90;
+    }
+    if (y < 0 && x > 0) {
+      // quadrant 2
+      theta *= -1;
+    }
+    return theta;
+  }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-     // getting robot pose for temp storage
+    // getting robot pose for temp storage
     Pose2d pose = m_driveSubsystem.getPose();
 
     // // getting x distance from target
@@ -73,15 +99,14 @@ public class PointToPose extends Command {
     Pose2d pose = m_driveSubsystem.getPose();
 
     // getting x distance from target
-    double x = m_targetPose.getX() - pose.getX();
-    SmartDashboard.putNumber("X distance", x);
-    // getting y distance from target
-    double y = m_targetPose.getY() - pose.getY();
-    SmartDashboard.putNumber("Y distance", y);
+    // double x;
+    // // getting y distance from target
+    // double y;
 
-    double theta = Units.radiansToDegrees(Math.atan2(y,x));
+    double theta = getAlignmentAngle(m_targetPose, pose);
     double phi = pose.getRotation().getDegrees();
-    double error = theta-phi;
+    double error = theta - phi;
+    SmartDashboard.putNumber("theta", theta);
 
     // Optional<Alliance> alliance = DriverStation.getAlliance();
     // if (alliance.get() == Alliance.Red) {
@@ -102,7 +127,7 @@ public class PointToPose extends Command {
     // }
 
     // targetYaw -= 72;
-    
+
     SmartDashboard.putNumber("Pose Point Target Yaw", theta);
     SmartDashboard.putNumber("phi", phi);
     SmartDashboard.putNumber("error", error);
