@@ -27,8 +27,8 @@ public class PointToPose extends Command {
   DriveSubsystem m_driveSubsystem;
   DoubleSupplier m_ySpeed;
   DoubleSupplier m_xSpeed;
-  Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32), new Rotation2d(0));
-  // Pose2d m_targetPose = new Pose2d(12.23, 4.03, new Rotation2d(0));
+  // Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32), new Rotation2d(0));
+  Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(470.59), Units.inchesToMeters(25.37), new Rotation2d(0));
   double m_theta;
 
   /** Creates a new PointToPose. */
@@ -53,15 +53,18 @@ public class PointToPose extends Command {
     double thetaOld = Units.radiansToDegrees(Math.atan2(y, x));
     SmartDashboard.putNumber("thetaOld", thetaOld);
     double theta = Units.radiansToDegrees(Math.atan2(Math.abs(y), Math.abs(x)));
+    // if (y == 0 && x > 0) {
+    //   theta = 0;
+    // } else if ( y == 0 && x < 0) {
+    //   theta = -180;
+    // }
     if (y > 0 && x < 0) {
       // quadrant 3
       theta = -1 * theta + 180;
-    }
-    if (y < 0 && x < 0) {
+    } else if (y < 0 && x < 0) {
       // quadrant 1
-      theta -= 90;
-    }
-    if (y < 0 && x > 0) {
+      theta -= 180;
+    } else if (y < 0 && x > 0) {
       // quadrant 2
       theta *= -1;
     }
@@ -106,6 +109,13 @@ public class PointToPose extends Command {
     double theta = getAlignmentAngle(m_targetPose, pose);
     double phi = pose.getRotation().getDegrees();
     double error = theta - phi;
+
+    if (error >= 180){
+      error = 180 - error;
+    }
+    else if (error <= -180) {
+      error = 360 + error;
+    }
     SmartDashboard.putNumber("theta", theta);
 
     // Optional<Alliance> alliance = DriverStation.getAlliance();
