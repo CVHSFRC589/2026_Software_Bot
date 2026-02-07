@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.lang.reflect.Field;
+
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -88,6 +90,8 @@ public class DriveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
 
+    SmartDashboard.putData(m_field);
+
     // Configure AutoBuilder last
     AutoBuilder.configure(
         this::getPose, // Robot pose supplier
@@ -144,7 +148,8 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Pose Estimator Pose X", getPose().getX());
     SmartDashboard.putNumber("Pose Estimator Pose Y", getPose().getY());
     SmartDashboard.putNumber("Pose Estimator Pose R", getPose().getRotation().getDegrees());
-    SmartDashboard.putData("Field pose", m_field);
+    // SmartDashboard.putData("Field pose", m_field);
+    m_field.setRobotPose(getPose());
     // SmartDashboard.putNumber("odo Pose X", m_odometry.getPoseMeters().getX());
     // SmartDashboard.putNumber("odo Pose Y", m_odometry.getPoseMeters().getY());
     // SmartDashboard.putNumber("odo Pose R",
@@ -193,7 +198,7 @@ public class DriveSubsystem extends SubsystemBase {
     // m_poseEstimator
   }
 
- public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+  public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
     ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
 
     SwerveModuleState[] targetStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(targetSpeeds);

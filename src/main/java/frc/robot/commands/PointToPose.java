@@ -4,21 +4,16 @@
 
 package frc.robot.commands;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -27,8 +22,9 @@ public class PointToPose extends Command {
   DriveSubsystem m_driveSubsystem;
   DoubleSupplier m_ySpeed;
   DoubleSupplier m_xSpeed;
-  // Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32), new Rotation2d(0));
-  Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(470.59), Units.inchesToMeters(25.37), new Rotation2d(0));
+  // Pose2d m_targetPose = new Pose2d(Units.inchesToMeters(468.56),
+  // Units.inchesToMeters(158.32), new Rotation2d(0));
+  Pose2d m_targetPose = FieldConstants.kRedTrenchLeftPose;
   double m_theta;
 
   /** Creates a new PointToPose. */
@@ -37,7 +33,8 @@ public class PointToPose extends Command {
     m_driveSubsystem = driveSubsystem;
     m_xSpeed = xSpeed;
     m_ySpeed = ySpeed;
-    m_turningController = new PIDController(DriveConstants.kRotationalPIDkP, DriveConstants.kRotationalPIDkI, DriveConstants.kRotationalPIDkD);
+    m_turningController = new PIDController(DriveConstants.kRotationalPIDkP, DriveConstants.kRotationalPIDkI,
+        DriveConstants.kRotationalPIDkD);
 
     addRequirements(m_driveSubsystem);
   }
@@ -53,11 +50,6 @@ public class PointToPose extends Command {
     double thetaOld = Units.radiansToDegrees(Math.atan2(y, x));
     SmartDashboard.putNumber("thetaOld", thetaOld);
     double theta = Units.radiansToDegrees(Math.atan2(Math.abs(y), Math.abs(x)));
-    // if (y == 0 && x > 0) {
-    //   theta = 0;
-    // } else if ( y == 0 && x < 0) {
-    //   theta = -180;
-    // }
     if (y > 0 && x < 0) {
       // quadrant 3
       theta = -1 * theta + 180;
@@ -110,49 +102,17 @@ public class PointToPose extends Command {
     double phi = pose.getRotation().getDegrees();
     double error = theta - phi;
 
-    if (error >= 180){
+    if (error >= 180) {
       error = 180 - error;
-    }
-    else if (error <= -180) {
+    } else if (error <= -180) {
       error = 360 + error;
     }
     SmartDashboard.putNumber("theta", theta);
 
-    // Optional<Alliance> alliance = DriverStation.getAlliance();
-    // if (alliance.get() == Alliance.Red) {
-    // if (x < 0) {
-    // targetYaw = (180 - theta) - phi;
-    // } else {
-    // targetYaw = theta - phi;
-
-    // }
-    // } else if (alliance.get() == Alliance.Blue) {
-    // if (x > 0) {
-    // targetYaw = (180 - theta) - phi;
-    // } else {
-    // targetYaw = theta - phi;
-    // }
-    // } else {
-
-    // }
-
-    // targetYaw -= 72;
-
     SmartDashboard.putNumber("Pose Point Target Yaw", theta);
     SmartDashboard.putNumber("phi", phi);
     SmartDashboard.putNumber("error", error);
-    // if (x > 0) {
-    // targetYaw = (180 - theta) - phi;
-    // } else {
-    // targetYaw = theta - phi;
-    // }
-    // SmartDashboard.putNumber("Y distance", y);
-    // getting angle required to point at target
-    // double targetYaw = Units.radiansToDegrees(Math.atan(x/y));
-    // double targetYaw = Units.radiansToDegrees(Math.atan2(x,y)) + 180 -
-    // pose.getRotation().getDegrees();
-    // Auto-align when requested
-    // m_turningController.setSetpoint(theta);
+
     m_turningController.setSetpoint(0);
     turn = -1.0 * MathUtil.applyDeadband(m_turningController.calculate(error), DriveConstants.kRotationalDeadband)
         * DriveConstants.kMaxAngularSpeed;

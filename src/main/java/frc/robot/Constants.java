@@ -7,10 +7,14 @@ package frc.robot;
 import java.io.File;
 import java.io.IOException;
 
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -123,13 +127,21 @@ public final class Constants {
 	}
 
 	public static final class CameraConstants {
-		public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(Units.inchesToMeters(6.5), 0.0, Units.inchesToMeters(24.5)),
+		public static final Transform3d kRobotToCam = new Transform3d(
+				new Translation3d(Units.inchesToMeters(6.5), 0.0, Units.inchesToMeters(24.5)),
 				new Rotation3d(0, 0, 0));
 		public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.5, 0.5, 1); // old: 4, 4, 8
-        public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+		public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 	}
 
 	public static final class FieldConstants {
+
+		// FIELD POSITION CONSTANTS
+		public static final Pose2d kRedHubPose = new Pose2d(Units.inchesToMeters(469.44), Units.inchesToMeters(158.84),
+				new Rotation2d(0));
+		public static final Pose2d kRedTrenchLeftPose = new Pose2d(Units.inchesToMeters(470.59),
+				Units.inchesToMeters(25.37), new Rotation2d(0));
+
 		public static final AprilTagFieldLayout kTagLayoutComp = AprilTagFieldLayout
 				.loadField(AprilTagFields.kDefaultField);
 
@@ -137,8 +149,10 @@ public final class Constants {
 			if (isHome) {
 				try {
 					// System.out.println(Filesystem.getDeployDirectory().getPath());
-					// System.out.println(new File(Filesystem.getDeployDirectory(), "fields/april_tag_layouts/home.json").getPath());
-					return new AprilTagFieldLayout(new File(Filesystem.getDeployDirectory(), "fields/april_tag_layouts/home.json").getPath());
+					// System.out.println(new File(Filesystem.getDeployDirectory(),
+					// "fields/april_tag_layouts/home.json").getPath());
+					return new AprilTagFieldLayout(
+							new File(Filesystem.getDeployDirectory(), "fields/april_tag_layouts/home.json").getPath());
 				} catch (IOException e) {
 					System.err.println("Could not load custom home field layout");
 					System.err.println(e);
@@ -147,8 +161,11 @@ public final class Constants {
 			} else {
 				try {
 					// System.out.println(Filesystem.getDeployDirectory().getPath());
-					// System.out.println(new File(Filesystem.getDeployDirectory(), "fields/april_tag_layouts/home.json").getPath());
-					return new AprilTagFieldLayout(new File(Filesystem.getDeployDirectory(), "fields/april_tag_layouts/2026welded.json").getPath());
+					// System.out.println(new File(Filesystem.getDeployDirectory(),
+					// "fields/april_tag_layouts/home.json").getPath());
+					return new AprilTagFieldLayout(
+							new File(Filesystem.getDeployDirectory(), "fields/april_tag_layouts/2026welded.json")
+									.getPath());
 				} catch (IOException e) {
 					System.err.println("Could not load custom home field layout");
 					System.err.println(e);
@@ -157,5 +174,11 @@ public final class Constants {
 			}
 
 		}
+	}
+
+	public static final class PathPlannerConstants {
+		public static final PathConstraints kPathFollowingConstraints = new PathConstraints(
+				0.05, 0.01,
+				Units.degreesToRadians(180), Units.degreesToRadians(360));
 	}
 }
