@@ -37,7 +37,7 @@ public class PointToPose extends Command {
     m_driveSubsystem = driveSubsystem;
     m_xSpeed = xSpeed;
     m_ySpeed = ySpeed;
-    m_turningController = new PIDController(0.0625, 1e-4, 0);
+    m_turningController = new PIDController(DriveConstants.kRotationalPIDkP, DriveConstants.kRotationalPIDkI, DriveConstants.kRotationalPIDkD);
 
     addRequirements(m_driveSubsystem);
   }
@@ -154,7 +154,7 @@ public class PointToPose extends Command {
     // Auto-align when requested
     // m_turningController.setSetpoint(theta);
     m_turningController.setSetpoint(0);
-    turn = -1.0 * MathUtil.applyDeadband(m_turningController.calculate(error), 0.00)
+    turn = -1.0 * MathUtil.applyDeadband(m_turningController.calculate(error), DriveConstants.kRotationalDeadband)
         * DriveConstants.kMaxAngularSpeed;
     SmartDashboard.putNumber("Turn velocity", turn);
     // Command drivetrain motors based on target speeds
