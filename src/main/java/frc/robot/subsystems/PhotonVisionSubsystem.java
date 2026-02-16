@@ -26,18 +26,22 @@ import frc.robot.Constants.FieldConstants;
 public class PhotonVisionSubsystem extends SubsystemBase {
   /** Creates a new PhotonVisionSubsystem. */
 
-  private final PhotonCamera m_topFrontCamera = new PhotonCamera("SoftwareBot_Camera_Top_Front");
+  private final PhotonCamera m_topFrontCamera = new PhotonCamera("Front_Camera");
+  private final PhotonCamera m_topBackCamera = new PhotonCamera("Back_Camera_Fisheye");
 
-  private final PhotonPoseEstimator m_photonPoseEstimator;
+  private final PhotonPoseEstimator m_photonPoseEstimatorFront;
+  private final PhotonPoseEstimator m_photonPoseEstimatorBack;
   private EstimateConsumer m_estimateConsumer;
 
   private Pose2d m_estimatedPose = new Pose2d();
   private Matrix<N3, N1> curStdDevs;
 
   public PhotonVisionSubsystem(boolean isHome, EstimateConsumer estimateConsumer) {
-    m_photonPoseEstimator = new PhotonPoseEstimator(FieldConstants.LoadLayout(isHome), CameraConstants.kRobotToCam);
+    m_photonPoseEstimatorFront = new PhotonPoseEstimator(FieldConstants.LoadLayout(isHome),
+        CameraConstants.kRobotToFrontCam);
+    m_photonPoseEstimatorBack = new PhotonPoseEstimator(FieldConstants.LoadLayout(isHome),
+        CameraConstants.kRobotToBackCam);
     m_estimateConsumer = estimateConsumer;
-
   }
 
   @Override
@@ -71,7 +75,7 @@ public class PhotonVisionSubsystem extends SubsystemBase {
       // Precalculation - see how many tags we found, and calculate an
       // average-distance metric
       for (var tgt : targets) {
-        var tagPose = m_photonPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+        var tagPose = m_photonPoseEstimatorFront.getFieldTags().getTagPose(tgt.getFiducialId());
         if (tagPose.isEmpty())
           continue;
         numTags++;
@@ -116,13 +120,35 @@ public class PhotonVisionSubsystem extends SubsystemBase {
     return m_topFrontCamera;
   }
 
+  public PhotonCamera getTopBackCamera() {
+    return m_topBackCamera;
+  }
+
   public void estimatePose2d() {
-    List<PhotonPipelineResult> results = m_topFrontCamera.getAllUnreadResults();
+    List<PhotonPipelineResult> front_results = m_topFrontCamera.getAllUnreadResults();
+    List<PhotonPipelineResult> back_results = m_topBackCamera.getAllUnreadResults();
     Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
-    for (var result : results) {
-      visionEstimate = m_photonPoseEstimator.estimateCoprocMultiTagPose(result);
+    for (var result : front_results) {
+      visionEstimate = m_photonPoseEstimatorFront.estimateCoprocMultiTagPose(result);
       if (visionEstimate.isEmpty()) {
-        visionEstimate = m_photonPoseEstimator.estimateLowestAmbiguityPose(result);
+        visionEstimate = m_photonPoseEstimatorFront.estimateLowestAmbiguityPose(result);
+      }
+      updateEstimationStdDevs(visionEstimate, result.getTargets());
+      // estimator.addVisionMeasurement(m_photonPoseEstimator.estimateCoprocMultiTagPose(result).get().estimatedPose.toPose2d(),
+      // Timer.getFPGATimestamp());
+      visionEstimate.ifPresent(
+          est -> {
+            // Change our trust in the measurement based on the tags we can see
+            var estStdDevs = getEstimationStdDevs();
+
+            m_estimateConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+          });
+    }
+
+    for (var result : back_results) {
+      visionEstimate = m_photonPoseEstimatorBack.estimateCoprocMultiTagPose(result);
+      if (visionEstimate.isEmpty()) {
+        visionEstimate = m_photonPoseEstimatorBack.estimateLowestAmbiguityPose(result);
       }
       updateEstimationStdDevs(visionEstimate, result.getTargets());
       // estimator.addVisionMeasurement(m_photonPoseEstimator.estimateCoprocMultiTagPose(result).get().estimatedPose.toPose2d(),

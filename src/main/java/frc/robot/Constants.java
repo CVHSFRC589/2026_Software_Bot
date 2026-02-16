@@ -127,8 +127,11 @@ public final class Constants {
 	}
 
 	public static final class CameraConstants {
-		public static final Transform3d kRobotToCam = new Transform3d(
+		public static final Transform3d kRobotToFrontCam = new Transform3d(
 				new Translation3d(Units.inchesToMeters(6.5), 0.0, Units.inchesToMeters(24.5)),
+				new Rotation3d(0, 0, 0));
+		public static final Transform3d kRobotToBackCam = new Transform3d(
+				new Translation3d(Units.inchesToMeters(4), Units.inchesToMeters(3.25), Units.inchesToMeters(22.25)),
 				new Rotation3d(0, 0, 0));
 		public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.5, 0.5, 1); // old: 4, 4, 8
 		public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
