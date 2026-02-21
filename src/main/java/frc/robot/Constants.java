@@ -83,6 +83,8 @@ public final class Constants {
 		public static final double kRotationalPIDkI = 1e-5;
 		public static final double kRotationalPIDkD = 0;
 		public static final double kRotationalDeadband = 0.01;
+
+		public static final double kAutoTimeDtSecondsAdjust = 0.02;
 	}
 
 	public static final class ModuleConstants {
@@ -108,7 +110,7 @@ public final class Constants {
 	}
 
 	public static final class AutoConstants {
-		public static final double kMaxSpeedMetersPerSecond = 3;
+		public static final double kMaxSpeedMetersPerSecond = 0.5;
 		public static final double kMaxAccelerationMetersPerSecondSquared = 3;
 		public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
 		public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
